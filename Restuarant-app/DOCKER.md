@@ -9,21 +9,27 @@ This guide explains how to run the Restaurant Discovery App using Docker.
 
 ## Quick Start
 
-### Production Build
+### Production Build with Build Arguments
 
-1. **Build the Docker image:**
+**Important:** Vite environment variables are embedded at **build time**, not runtime. You must pass them as build arguments.
+
+1. **Build the Docker image with API configuration:**
    ```bash
-   docker build -t restaurant-app .
+   docker build \
+     --build-arg VITE_API_URL=https://690dc4e6bd0fefc30a0241c0.mockapi.io/api/v1 \
+     -t restaurant-app .
+   ```
+
+   Or with a different MockAPI.io project:
+   ```bash
+   docker build \
+     --build-arg VITE_API_URL=https://your-project-id.mockapi.io/api/v1 \
+     -t restaurant-app .
    ```
 
 2. **Run the container:**
    ```bash
-   docker run -p 3000:80 --env-file .env restaurant-app
-   ```
-
-   Or without .env file:
-   ```bash
-   docker run -p 3000:80 -e VITE_API_URL=https://690dc4e6bd0fefc30a0241c0.mockapi.io/api/v1 restaurant-app
+   docker run -p 3000:80 restaurant-app
    ```
 
 3. **Access the app:**
@@ -31,15 +37,20 @@ This guide explains how to run the Restaurant Discovery App using Docker.
 
 ### Using Docker Compose (Recommended)
 
-1. **Create a `.env` file** (if not exists):
+1. **Create a `.env` file** with your MockAPI.io API URL:
    ```env
+   # MockAPI.io API URL (embedded at build time)
    VITE_API_URL=https://690dc4e6bd0fefc30a0241c0.mockapi.io/api/v1
    ```
+   
+   **Note:** Replace with your own MockAPI.io project URL if different.
 
-2. **Start the application:**
+2. **Build and start the application:**
    ```bash
-   docker-compose up -d
+   docker-compose up -d --build
    ```
+
+   The build arguments are automatically passed from your `.env` file.
 
 3. **View logs:**
    ```bash
@@ -71,19 +82,46 @@ For development with hot-reload:
    docker-compose -f docker-compose.dev.yml up
    ```
 
-## Environment Variables
+## Build Arguments
 
-The app uses the following environment variables:
+The Dockerfile accepts the following build argument (passed at build time):
 
-- `VITE_API_URL` - API endpoint URL (default: MockAPI.io URL)
+- `VITE_API_URL` - MockAPI.io API endpoint URL (default: `https://690dc4e6bd0fefc30a0241c0.mockapi.io/api/v1`)
 
-**Note:** Environment variables starting with `VITE_` are embedded at build time. To change them, you need to rebuild the Docker image.
+**Note:** MockAPI.io doesn't require API keys - it's a free mock API service. You only need to provide the API URL.
+
+**Important:** This is a **build-time** argument, not a runtime environment variable. Vite embeds it into the JavaScript bundle during the build process. To change it, you must rebuild the Docker image.
+
+### Passing Build Arguments
+
+**Using docker build:**
+```bash
+# Build with default MockAPI.io URL
+docker build -t restaurant-app .
+
+# Build with custom MockAPI.io URL
+docker build \
+  --build-arg VITE_API_URL=https://your-project-id.mockapi.io/api/v1 \
+  -t restaurant-app .
+```
+
+**Using docker-compose:**
+The `docker-compose.yml` automatically reads from your `.env` file and passes it as a build argument.
 
 ## Docker Commands
 
 ### Build
 ```bash
+# Basic build (uses default API URL)
 docker build -t restaurant-app .
+
+# Build with custom API URL
+docker build --build-arg VITE_API_URL=https://your-api-url.com/api/v1 -t restaurant-app .
+
+# Build with custom MockAPI.io URL
+docker build \
+  --build-arg VITE_API_URL=https://your-project-id.mockapi.io/api/v1 \
+  -t restaurant-app .
 ```
 
 ### Run
@@ -91,10 +129,7 @@ docker build -t restaurant-app .
 docker run -p 3000:80 restaurant-app
 ```
 
-### Run with environment variables
-```bash
-docker run -p 3000:80 -e VITE_API_URL=your-api-url restaurant-app
-```
+**Note:** Environment variables are embedded at build time, not runtime. You cannot change them with `-e` flag. You must rebuild the image with `--build-arg`.
 
 ### Run in detached mode
 ```bash
