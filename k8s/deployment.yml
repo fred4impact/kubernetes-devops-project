@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: restaurant-app
-        image: runtesting/restaurant:latest
+        image: runtesting/restaurant-app:latest
         ports:
         - containerPort: 80
