@@ -124,7 +124,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                dir('K8s') {
+                dir('k8s') {
                     script {
                         withKubeConfig(credentialsId: 'kubeconfig-creds') {
                             sh '''
