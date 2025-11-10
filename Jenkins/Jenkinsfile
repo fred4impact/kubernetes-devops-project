@@ -85,15 +85,13 @@ pipeline {
             steps {
                 dir('Restaurant-app') {
                     script {
-                        docker.withRegistry('https://index.docker.io/v1/', 'docker') {
-                            withCredentials([string(credentialsId: 'mock-api', variable: 'MOCK_API_URL')]) {
-                                sh '''
-                                    echo "🏗️ Building Docker image..."
-                                    docker build \
-                                        --build-arg VITE_API_URL="${VITE_API_URL}" \
-                                        -t runtesting/restaurant-app:latest .
-                                '''
-                            }
+                        docker.withTool('docker') {
+                            sh '''
+                                echo "🏗️ Building Docker image..."
+                                docker build \
+                                    --build-arg VITE_API_URL="${VITE_API_URL}" \
+                                    -t runtesting/restaurant-app:latest .
+                            '''
                         }
                     }
                 }
